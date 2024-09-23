@@ -729,7 +729,7 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
             let oldContentOffset = change?[.oldKey] as? CGPoint
             let startedByUser = scrollView.isDragging || scrollView.isDecelerating
             // zpdl9089 : https://github.com/pichillilorenzo/flutter_inappwebview/issues/1947
-            if #available(iOS 17.2, *) {
+            if #available(iOS 17.0, *) {
                 if let y = newContentOffset?.y {
                     if(!startedByUser && scrollView.contentInset.bottom < 0.0 && y <= scrollView.contentInset.bottom) {
                         scrollView.contentOffset = oldContentOffset ?? .zero
@@ -1439,12 +1439,14 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
     }
 
     public override func evaluateJavaScript(_ javaScriptString: String, completionHandler: (@MainActor @Sendable (Any?, (any Error)?) -> Void)? = nil) {
-        if let applePayAPIEnabled = settings?.applePayAPIEnabled, applePayAPIEnabled {
-            completionHandler?(nil, nil)
-            return
+            if let applePayAPIEnabled = settings?.applePayAPIEnabled, applePayAPIEnabled {
+                if let completionHandler = completionHandler {
+                    completionHandler(nil, nil)
+                }
+                return
+            }
+            super.evaluateJavaScript(javaScriptString, completionHandler: completionHandler)
         }
-        super.evaluateJavaScript(javaScriptString, completionHandler: completionHandler)
-    }
     
     @available(iOS 14.0, *)
     public func evaluateJavaScript(_ javaScript: String, frame: WKFrameInfo? = nil, contentWorld: WKContentWorld, completionHandler: ((Result<Any, Error>) -> Void)? = nil) {
